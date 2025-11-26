@@ -1,0 +1,40 @@
+# Build artifacts
+build/
+.dart_tool/
+.packages
+.pub/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Server database (will be created in container)
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+
+# Test files
+test/
+server/test/
+
+# Documentation
+*.md
+!README.md
+
+# Flutter specific
+ios/
+android/
+macos/
+linux/
+windows/
+web/
+
