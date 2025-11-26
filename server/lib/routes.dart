@@ -68,6 +68,9 @@ Router setupRoutes() {
 
   // Flutter Web App - serve static files from /flutter
   final flutterWebPath = path.join(Directory.current.path, 'flutter_web');
+  print('Checking for Flutter web at: $flutterWebPath');
+  print('Directory exists: ${Directory(flutterWebPath).existsSync()}');
+  
   if (Directory(flutterWebPath).existsSync()) {
     final flutterHandler = createStaticHandler(
       flutterWebPath,
@@ -75,23 +78,42 @@ Router setupRoutes() {
       serveFilesOutsidePath: false,
     );
     
-    // Serve Flutter web app - handle all paths under /flutter
-    router.all('/flutter<path|.*>', (Request request) {
-      // Extract the path after /flutter
+    // Create a handler that processes /flutter paths
+    Handler flutterRouteHandler = (Request request) {
       final requestPath = request.url.path;
-      String filePath;
       
-      if (requestPath == '/flutter' || requestPath == '/flutter/') {
-        filePath = '/';
-      } else {
-        // Remove /flutter prefix
-        filePath = requestPath.replaceFirst('/flutter', '');
-        if (filePath.isEmpty) filePath = '/';
+      // Redirect /flutter to /flutter/
+      if (requestPath == '/flutter') {
+        return Response.movedPermanently('/flutter/');
       }
       
-      // Create new request with adjusted path
+      // Handle /flutter/ and /flutter/* paths
+      if (requestPath.startsWith('/flutter/')) {
+        // Remove /flutter prefix
+        final filePath = requestPath.substring('/flutter'.length);
+        final newRequest = request.change(path: filePath.isEmpty ? '/' : filePath);
+        return flutterHandler(newRequest);
+      }
+      
+      // Should not reach here, but just in case
+      return Response.notFound('Invalid Flutter web path: $requestPath');
+    };
+    
+    // Register routes - try multiple patterns to catch all cases
+    router.get('/flutter', flutterRouteHandler);
+    router.all('/flutter/', flutterRouteHandler);
+    
+    // Catch-all for paths under /flutter/ using a parameter
+    router.all('/flutter/<path>', (Request request, String path) {
+      final filePath = '/$path';
       final newRequest = request.change(path: filePath);
       return flutterHandler(newRequest);
+    });
+  } else {
+    print('WARNING: Flutter web directory not found at $flutterWebPath');
+    // Add a fallback route to show helpful error
+    router.get('/flutter', (Request request) {
+      return Response.notFound('Flutter web app not found. Directory: $flutterWebPath');
     });
   }
 
