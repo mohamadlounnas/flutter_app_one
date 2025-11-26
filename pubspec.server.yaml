@@ -1,0 +1,10 @@
+name: flutter_one
+description: "Flutter One - Server build only (no Flutter dependencies)"
+version: 0.1.0+1
+publish_to: 'none'
+
+environment:
+  sdk: ^3.10.0
+
+# No dependencies - server only needs the model files from lib/
+

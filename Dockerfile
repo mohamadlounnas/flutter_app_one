@@ -5,21 +5,21 @@ FROM dart:stable AS build
 # Set working directory
 WORKDIR /app
 
-# Copy pubspec files first for better caching
-COPY pubspec.yaml pubspec.lock ./
+# Copy server pubspec files first
 COPY server/pubspec.yaml server/pubspec.lock ./server/
 
-# Get dependencies for root project
-RUN dart pub get
-
-# Get dependencies for server (which depends on root)
-WORKDIR /app/server
-RUN dart pub get
-
-# Copy the entire project (needed for server to import flutter_one package)
-WORKDIR /app
+# Copy only the lib directory (models) from parent project
+# We don't need Flutter dependencies, just the model files
 COPY lib ./lib/
-COPY server ./server/
+
+# Copy server source files
+COPY server/lib ./server/lib/
+COPY server/bin ./server/bin/
+
+# Get dependencies for server only
+# The server's pubspec.yaml has path dependency to parent, but we only need lib files
+WORKDIR /app/server
+RUN dart pub get --no-example
 
 # Build the server executable
 WORKDIR /app/server
