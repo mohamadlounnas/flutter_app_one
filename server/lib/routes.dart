@@ -1,8 +1,5 @@
-import 'dart:io';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf/shelf.dart';
-import 'package:shelf_static/shelf_static.dart';
-import 'package:path/path.dart' as path;
 import 'handlers/dish_handler.dart';
 import 'handlers/order_handler.dart';
 import 'handlers/user_handler.dart';
