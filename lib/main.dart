@@ -8,13 +8,20 @@ import 'package:flutter_one/presontation/home.dart';
 void main() async {
   var client = Dio();
   
-  // Auto-detect API URL based on current host (works for both local and deployed)
+  // Auto-detect API URL based on current host
   // When served from /flutter, use the same host for API
-  if (Uri.base.host.isNotEmpty && Uri.base.host != 'localhost') {
-    // Running on web - use same origin for API
-    client.options.baseUrl = '${Uri.base.scheme}://${Uri.base.host}${Uri.base.hasPort ? ':${Uri.base.port}' : ''}';
-  } else {
-    // Local development fallback
+  try {
+    final baseUri = Uri.base;
+    if (baseUri.host.isNotEmpty && baseUri.host != 'localhost' && baseUri.host != '127.0.0.1') {
+      // Running on web (deployed) - use same origin for API
+      final port = baseUri.hasPort ? ':${baseUri.port}' : '';
+      client.options.baseUrl = '${baseUri.scheme}://${baseUri.host}$port';
+    } else {
+      // Local development
+      client.options.baseUrl = 'http://localhost:8080';
+    }
+  } catch (e) {
+    // Fallback to localhost if detection fails
     client.options.baseUrl = 'http://localhost:8080';
   }
 
