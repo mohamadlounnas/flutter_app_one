@@ -1,4 +1,5 @@
 # Use official Dart image
+# Updated for Railway deployment with stable SDK
 FROM dart:stable AS build
 
 # Set working directory
