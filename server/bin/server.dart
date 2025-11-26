@@ -15,50 +15,51 @@ void main(List<String> arguments) async {
   // Inject test data
   injectTestData();
 
+  // Setup routes
+  final router = setupRoutes();
+  
   // Setup Flutter web static handler if directory exists
-  Handler? flutterWebHandler;
   final flutterWebPath = path.join(Directory.current.path, 'flutter_web');
+  print('Checking Flutter web at: $flutterWebPath');
+  print('Directory exists: ${Directory(flutterWebPath).existsSync()}');
+  
+  Handler handler;
   if (Directory(flutterWebPath).existsSync()) {
-    print('Flutter web found at: $flutterWebPath');
-    flutterWebHandler = createStaticHandler(
+    print('Flutter web found - setting up static handler');
+    final flutterHandler = createStaticHandler(
       flutterWebPath,
       defaultDocument: 'index.html',
-      serveFilesOutsidePath: false,
     );
-  } else {
-    print('Flutter web not found at: $flutterWebPath');
-  }
-
-  // Setup routes with Flutter web middleware
-  final handler = Pipeline()
-      .addMiddleware(corsHeaders())
-      .addMiddleware(logRequests())
-      .addMiddleware((Handler innerHandler) {
-        return (Request request) {
-          // Handle /flutter paths before routing
+    
+    // Create a handler that checks path and routes accordingly
+    handler = Pipeline()
+        .addMiddleware(corsHeaders())
+        .addMiddleware(logRequests())
+        .addHandler((Request request) {
           final requestPath = request.url.path;
-          if (flutterWebHandler != null && requestPath.startsWith('/flutter')) {
-            // Redirect /flutter to /flutter/
-            if (requestPath == '/flutter') {
-              return Response.movedPermanently('/flutter/');
-            }
-            // Handle /flutter/ and sub-paths
-            if (requestPath.startsWith('/flutter/')) {
-              // Remove /flutter prefix, keep the trailing path
-              final filePath = requestPath.substring('/flutter'.length);
-              // Ensure path starts with / for static handler
-              final normalizedPath = filePath.isEmpty || !filePath.startsWith('/') 
-                  ? (filePath.isEmpty ? '/' : '/$filePath')
-                  : filePath;
-              final newRequest = request.change(path: normalizedPath);
-              return flutterWebHandler(newRequest);
-            }
+          
+          // Handle /flutter paths
+          if (requestPath == '/flutter' || requestPath == '/flutter/') {
+            // Serve index.html for /flutter/
+            final indexRequest = request.change(path: '/');
+            return flutterHandler(indexRequest);
+          } else if (requestPath.startsWith('/flutter/')) {
+            // Serve files under /flutter/
+            final filePath = requestPath.substring('/flutter'.length);
+            final fileRequest = request.change(path: filePath.isEmpty ? '/' : filePath);
+            return flutterHandler(fileRequest);
           }
-          // Pass to router for other paths
-          return innerHandler(request);
-        };
-      })
-      .addHandler(setupRoutes().call);
+          
+          // All other paths go to router
+          return router(request);
+        });
+  } else {
+    print('Flutter web not found - serving API only');
+    handler = Pipeline()
+        .addMiddleware(corsHeaders())
+        .addMiddleware(logRequests())
+        .addHandler(router);
+  }
 
   // Get port from environment or use default
   final port = int.parse(Platform.environment['PORT'] ?? '8080');
