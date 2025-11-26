@@ -1,0 +1,27 @@
+# Dart
+.dart_tool/
+.packages
+.pub/
+.pub-cache/
+build/
+*.dart.js
+*.dart.js.map
+*.info.json
+
+# Database
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
