@@ -46,7 +46,7 @@ void main(List<String> arguments) async {
             if (requestPath.startsWith('/flutter/')) {
               final filePath = requestPath.substring('/flutter'.length);
               final newRequest = request.change(path: filePath.isEmpty ? '/' : filePath);
-              return flutterWebHandler!(newRequest);
+              return flutterWebHandler(newRequest);
             }
           }
           // Pass to router for other paths
