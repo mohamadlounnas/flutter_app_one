@@ -37,19 +37,19 @@ RUN dart compile exe bin/server.dart -o bin/server
 # Create runtime image
 FROM debian:bookworm-slim
 
-# Install required runtime dependencies
+# Install required runtime dependencies including SQLite dev package
+# The dev package provides the unversioned libsqlite3.so symlink
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates \
     libsqlite3-0 \
+    libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/* && \
-    # Create symlink from versioned library to unversioned name
-    # Debian installs libsqlite3.so.0, but Dart looks for libsqlite3.so
-    (ln -sf /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 /usr/lib/x86_64-linux-gnu/libsqlite3.so || \
-     ln -sf /lib/x86_64-linux-gnu/libsqlite3.so.0 /lib/x86_64-linux-gnu/libsqlite3.so || \
-     find /usr/lib* /lib* -name "libsqlite3.so.0" -exec sh -c 'ln -sf "$1" "$(dirname "$1")/libsqlite3.so"' _ {} \; 2>/dev/null || true) && \
     # Update library cache
-    ldconfig
+    ldconfig && \
+    # Verify SQLite library is accessible
+    ls -la /usr/lib/x86_64-linux-gnu/libsqlite3.so* || \
+    ls -la /lib/x86_64-linux-gnu/libsqlite3.so* || true
 
 # Set working directory
 WORKDIR /app
