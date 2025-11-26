@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
+import 'package:shelf_static/shelf_static.dart';
+import 'package:path/path.dart' as path;
 import '../lib/database/database.dart';
 import '../lib/routes.dart';
 import '../lib/test_data.dart';
@@ -13,10 +15,44 @@ void main(List<String> arguments) async {
   // Inject test data
   injectTestData();
 
-  // Setup routes
+  // Setup Flutter web static handler if directory exists
+  Handler? flutterWebHandler;
+  final flutterWebPath = path.join(Directory.current.path, 'flutter_web');
+  if (Directory(flutterWebPath).existsSync()) {
+    print('Flutter web found at: $flutterWebPath');
+    flutterWebHandler = createStaticHandler(
+      flutterWebPath,
+      defaultDocument: 'index.html',
+      serveFilesOutsidePath: false,
+    );
+  } else {
+    print('Flutter web not found at: $flutterWebPath');
+  }
+
+  // Setup routes with Flutter web middleware
   final handler = Pipeline()
       .addMiddleware(corsHeaders())
       .addMiddleware(logRequests())
+      .addMiddleware((Handler innerHandler) {
+        return (Request request) {
+          // Handle /flutter paths before routing
+          final requestPath = request.url.path;
+          if (flutterWebHandler != null && requestPath.startsWith('/flutter')) {
+            // Redirect /flutter to /flutter/
+            if (requestPath == '/flutter') {
+              return Response.movedPermanently('/flutter/');
+            }
+            // Handle /flutter/ and sub-paths
+            if (requestPath.startsWith('/flutter/')) {
+              final filePath = requestPath.substring('/flutter'.length);
+              final newRequest = request.change(path: filePath.isEmpty ? '/' : filePath);
+              return flutterWebHandler!(newRequest);
+            }
+          }
+          // Pass to router for other paths
+          return innerHandler(request);
+        };
+      })
       .addHandler(setupRoutes().call);
 
   // Get port from environment or use default
