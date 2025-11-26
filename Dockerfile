@@ -44,11 +44,7 @@ RUN apt-get update && \
     libsqlite3-0 \
     && rm -rf /var/lib/apt/lists/* && \
     # Update library cache to ensure SQLite is found
-    ldconfig && \
-    # Verify SQLite library is available
-    ls -la /usr/lib/x86_64-linux-gnu/libsqlite3.so* || \
-    ls -la /lib/x86_64-linux-gnu/libsqlite3.so* || \
-    find /usr -name "libsqlite3.so*" 2>/dev/null | head -5
+    ldconfig
 
 # Set working directory
 WORKDIR /app
