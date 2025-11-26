@@ -36,5 +36,5 @@ android/
 macos/
 linux/
 windows/
-web/
+# Note: web/ is needed for Flutter web build, so don't ignore it
 
