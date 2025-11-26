@@ -44,8 +44,13 @@ void main(List<String> arguments) async {
             }
             // Handle /flutter/ and sub-paths
             if (requestPath.startsWith('/flutter/')) {
+              // Remove /flutter prefix, keep the trailing path
               final filePath = requestPath.substring('/flutter'.length);
-              final newRequest = request.change(path: filePath.isEmpty ? '/' : filePath);
+              // Ensure path starts with / for static handler
+              final normalizedPath = filePath.isEmpty || !filePath.startsWith('/') 
+                  ? (filePath.isEmpty ? '/' : '/$filePath')
+                  : filePath;
+              final newRequest = request.change(path: normalizedPath);
               return flutterWebHandler(newRequest);
             }
           }
