@@ -20,7 +20,7 @@ void main(List<String> arguments) async {
       .addHandler(setupRoutes().call);
 
   // Get port from environment or use default
-  final port = int.parse(Platform.environment['PORT'] ?? '8081');
+  final port = int.parse(Platform.environment['PORT'] ?? '8080');
   
   // Get host - use 0.0.0.0 to allow access from local network
   final host = InternetAddress.anyIPv4;
