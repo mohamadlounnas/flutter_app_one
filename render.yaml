@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: flutter-one-server
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    envVars:
+      - key: PORT
+        value: 8080
+    healthCheckPath: /health
+
