@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf/shelf.dart';
+import 'package:shelf_static/shelf_static.dart';
+import 'package:path/path.dart' as path;
 import 'handlers/dish_handler.dart';
 import 'handlers/order_handler.dart';
 import 'handlers/user_handler.dart';
@@ -62,6 +65,35 @@ Router setupRoutes() {
       headers: {'Content-Type': 'text/html; charset=utf-8'},
     );
   });
+
+  // Flutter Web App - serve static files from /flutter
+  final flutterWebPath = path.join(Directory.current.path, 'flutter_web');
+  if (Directory(flutterWebPath).existsSync()) {
+    final flutterHandler = createStaticHandler(
+      flutterWebPath,
+      defaultDocument: 'index.html',
+      serveFilesOutsidePath: false,
+    );
+    
+    // Serve Flutter web app - handle all paths under /flutter
+    router.all('/flutter<path|.*>', (Request request) {
+      // Extract the path after /flutter
+      final requestPath = request.url.path;
+      String filePath;
+      
+      if (requestPath == '/flutter' || requestPath == '/flutter/') {
+        filePath = '/';
+      } else {
+        // Remove /flutter prefix
+        filePath = requestPath.replaceFirst('/flutter', '');
+        if (filePath.isEmpty) filePath = '/';
+      }
+      
+      // Create new request with adjusted path
+      final newRequest = request.change(path: filePath);
+      return flutterHandler(newRequest);
+    });
+  }
 
   return router;
 }

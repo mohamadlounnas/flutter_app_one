@@ -1,9 +1,27 @@
-# Use official Dart image
-# Updated for Railway deployment with stable SDK
-FROM dart:stable AS build
+# Use Flutter image for building web app, then Dart for server
+FROM ghcr.io/cirruslabs/flutter:stable AS flutter_build
+
+WORKDIR /app
+
+# Copy Flutter project files
+COPY pubspec.yaml pubspec.lock ./
+COPY lib ./lib/
+COPY web ./web/
+
+# Get Flutter dependencies
+RUN flutter pub get
+
+# Build Flutter web app with base href /flutter/
+RUN flutter build web --base-href /flutter/ --release
+
+# Use Dart image for server build
+FROM dart:stable AS server_build
 
 # Set working directory
 WORKDIR /app
+
+# Copy Flutter web build from previous stage
+COPY --from=flutter_build /app/build/web ./flutter_web/
 
 # Copy server pubspec files
 COPY server/pubspec.yaml server/pubspec.lock ./server/
@@ -55,13 +73,16 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy the compiled server executable
-COPY --from=build /app/server/bin/server ./bin/
+COPY --from=server_build /app/server/bin/server ./bin/
 
 # Copy server lib files
-COPY --from=build /app/server/lib ./lib/
+COPY --from=server_build /app/server/lib ./lib/
 
 # Copy parent lib files (for flutter_one package)
-COPY --from=build /app/lib ./../lib/
+COPY --from=server_build /app/lib ./../lib/
+
+# Copy Flutter web build
+COPY --from=server_build /app/flutter_web ./flutter_web/
 
 # Create data directory for SQLite database
 RUN mkdir -p data

@@ -8,7 +8,7 @@ import 'package:flutter_one/presontation/home.dart';
 void main() async {
 
   var client = Dio();
-  client.options.baseUrl = 'http://localhost:8080';
+  client.options.baseUrl = 'https://flutter-one-server-production.up.railway.app';
 
   // dishes
   var datasource = RemoteDishesDataSource(client: client);
