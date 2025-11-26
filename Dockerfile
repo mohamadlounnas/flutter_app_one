@@ -68,8 +68,10 @@ RUN mkdir -p data
 # Expose port
 EXPOSE 8080
 
-# Set environment variable
+# Set environment variables
 ENV PORT=8080
+# Ensure SQLite library can be found
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 
 # Run the server
 CMD ["./bin/server"]
