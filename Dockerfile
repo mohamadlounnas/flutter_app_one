@@ -43,18 +43,13 @@ RUN apt-get update && \
     ca-certificates \
     libsqlite3-0 \
     && rm -rf /var/lib/apt/lists/* && \
-    # Find and verify SQLite library location
-    find /usr -name "*sqlite3*.so*" -type f 2>/dev/null && \
-    # Create symlink if needed (libsqlite3.so might be versioned)
-    (ls -la /usr/lib/x86_64-linux-gnu/libsqlite3.so* 2>/dev/null || \
-     ls -la /lib/x86_64-linux-gnu/libsqlite3.so* 2>/dev/null || \
-     find /usr/lib -name "libsqlite3.so*" -exec ln -sf {} /usr/lib/x86_64-linux-gnu/libsqlite3.so \; 2>/dev/null || true) && \
+    # Create symlink from versioned library to unversioned name
+    # Debian installs libsqlite3.so.0, but Dart looks for libsqlite3.so
+    (ln -sf /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 /usr/lib/x86_64-linux-gnu/libsqlite3.so || \
+     ln -sf /lib/x86_64-linux-gnu/libsqlite3.so.0 /lib/x86_64-linux-gnu/libsqlite3.so || \
+     find /usr/lib* /lib* -name "libsqlite3.so.0" -exec sh -c 'ln -sf "$1" "$(dirname "$1")/libsqlite3.so"' _ {} \; 2>/dev/null || true) && \
     # Update library cache
-    ldconfig && \
-    # Verify library is accessible
-    test -f /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 || \
-    test -f /lib/x86_64-linux-gnu/libsqlite3.so.0 || \
-    (echo "SQLite library not found in standard locations" && exit 1)
+    ldconfig
 
 # Set working directory
 WORKDIR /app
