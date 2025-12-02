@@ -3,6 +3,8 @@ import 'package:shelf/shelf.dart';
 import 'handlers/dish_handler.dart';
 import 'handlers/order_handler.dart';
 import 'handlers/user_handler.dart';
+import 'handlers/auth_handler.dart';
+import 'auth/auth_middleware.dart';
 import 'static/api_docs.dart';
 
 Router setupRoutes() {
@@ -10,44 +12,110 @@ Router setupRoutes() {
   final dishHandler = DishHandler();
   final orderHandler = OrderHandler();
   final userHandler = UserHandler();
+  final authHandler = AuthHandler();
 
-  // Dishes routes
+  // Auth routes (public)
+  router.post('/api/auth/register', authHandler.register);
+  router.post('/api/auth/login', authHandler.login);
+
+  // Auth routes (protected)
+  router.get('/api/auth/me', (Request request) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addHandler((req) => authHandler.me(req))(request);
+  });
+  router.post('/api/auth/refresh', (Request request) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addHandler((req) => authHandler.refresh(req))(request);
+  });
+  router.put('/api/auth/change-password', (Request request) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addHandler((req) => authHandler.changePassword(req))(request);
+  });
+
+  // Dishes routes (public read, protected write)
   router.get('/api/dishes', dishHandler.getAll);
   router.get('/api/dishes/<id>', (Request request, String id) {
     return dishHandler.getById(request, id);
   });
-  router.post('/api/dishes', dishHandler.create);
+  router.post('/api/dishes', (Request request) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addMiddleware(roleMiddleware(['admin']))
+        .addHandler((req) => dishHandler.create(req))(request);
+  });
   router.put('/api/dishes/<id>', (Request request, String id) {
-    return dishHandler.update(request, id);
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addMiddleware(roleMiddleware(['admin']))
+        .addHandler((req) => dishHandler.update(req, id))(request);
   });
   router.delete('/api/dishes/<id>', (Request request, String id) {
-    return dishHandler.delete(request, id);
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addMiddleware(roleMiddleware(['admin']))
+        .addHandler((req) => dishHandler.delete(req, id))(request);
   });
 
-  // Orders routes
-  router.get('/api/orders', orderHandler.getAll);
-  router.get('/api/orders/<id>', (Request request, String id) {
-    return orderHandler.getById(request, id);
+  // Orders routes (protected)
+  router.get('/api/orders', (Request request) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addHandler((req) => orderHandler.getAll(req))(request);
   });
-  router.post('/api/orders', orderHandler.create);
+  router.get('/api/orders/<id>', (Request request, String id) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addHandler((req) => orderHandler.getById(req, id))(request);
+  });
+  router.post('/api/orders', (Request request) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addHandler((req) => orderHandler.create(req))(request);
+  });
   router.put('/api/orders/<id>', (Request request, String id) {
-    return orderHandler.update(request, id);
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addHandler((req) => orderHandler.update(req, id))(request);
   });
   router.delete('/api/orders/<id>', (Request request, String id) {
-    return orderHandler.delete(request, id);
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addHandler((req) => orderHandler.delete(req, id))(request);
   });
 
-  // Users routes
-  router.get('/api/users', userHandler.getAll);
-  router.get('/api/users/<id>', (Request request, String id) {
-    return userHandler.getById(request, id);
+  // Users routes (admin only)
+  router.get('/api/users', (Request request) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addMiddleware(roleMiddleware(['admin']))
+        .addHandler((req) => userHandler.getAll(req))(request);
   });
-  router.post('/api/users', userHandler.create);
+  router.get('/api/users/<id>', (Request request, String id) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addMiddleware(roleMiddleware(['admin']))
+        .addHandler((req) => userHandler.getById(req, id))(request);
+  });
+  router.post('/api/users', (Request request) {
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addMiddleware(roleMiddleware(['admin']))
+        .addHandler((req) => userHandler.create(req))(request);
+  });
   router.put('/api/users/<id>', (Request request, String id) {
-    return userHandler.update(request, id);
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addMiddleware(roleMiddleware(['admin']))
+        .addHandler((req) => userHandler.update(req, id))(request);
   });
   router.delete('/api/users/<id>', (Request request, String id) {
-    return userHandler.delete(request, id);
+    return Pipeline()
+        .addMiddleware(authMiddleware())
+        .addMiddleware(roleMiddleware(['admin']))
+        .addHandler((req) => userHandler.delete(req, id))(request);
   });
 
   // Health check

@@ -4,9 +4,9 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:path/path.dart' as path;
-import '../lib/database/database.dart';
-import '../lib/routes.dart';
-import '../lib/test_data.dart';
+import 'package:server/database/database.dart';
+import 'package:server/routes.dart';
+import 'package:server/test_data.dart';
 
 void main(List<String> arguments) async {
   // Initialize database
@@ -74,18 +74,31 @@ void main(List<String> arguments) async {
   print('Local network access: http://$localIP:${server.port}');
   print('');
   print('Available endpoints:');
+  print('');
+  print('  Auth (public):');
+  print('  POST   /api/auth/register     - Register new user');
+  print('  POST   /api/auth/login        - Login with phone/password');
+  print('');
+  print('  Auth (protected):');
+  print('  GET    /api/auth/me           - Get current user info');
+  print('  POST   /api/auth/refresh      - Refresh JWT token');
+  print('  PUT    /api/auth/change-password - Change password');
+  print('');
+  print('  Dishes (public read, admin write):');
   print('  GET    /api/dishes');
   print('  GET    /api/dishes/<id>');
-  print('  POST   /api/dishes');
-  print('  PUT    /api/dishes/<id>');
-  print('  DELETE /api/dishes/<id>');
+  print('  POST   /api/dishes            - Admin only');
+  print('  PUT    /api/dishes/<id>       - Admin only');
+  print('  DELETE /api/dishes/<id>       - Admin only');
   print('');
+  print('  Orders (protected):');
   print('  GET    /api/orders');
   print('  GET    /api/orders/<id>');
   print('  POST   /api/orders');
   print('  PUT    /api/orders/<id>');
   print('  DELETE /api/orders/<id>');
   print('');
+  print('  Users (admin only):');
   print('  GET    /api/users');
   print('  GET    /api/users/<id>');
   print('  POST   /api/users');

@@ -13,3 +13,5 @@ fi
 echo "Starting server..."
 dart run bin/server.dart
 
+
+
