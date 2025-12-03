@@ -45,14 +45,24 @@ class AppRouter {
         GoRoute(
           path: '/posts/:id',
           builder: (context, state) {
-            final id = int.parse(state.pathParameters['id']!);
+            final id = int.tryParse(state.pathParameters['id'] ?? '');
+            if (id == null) {
+              return const Scaffold(
+                body: Center(child: Text('Invalid post ID')),
+              );
+            }
             return PostDetailPage(postId: id);
           },
         ),
         GoRoute(
           path: '/posts/:id/edit',
           builder: (context, state) {
-            final id = int.parse(state.pathParameters['id']!);
+            final id = int.tryParse(state.pathParameters['id'] ?? '');
+            if (id == null) {
+              return const Scaffold(
+                body: Center(child: Text('Invalid post ID')),
+              );
+            }
             return PostCreatePage(postId: id);
           },
         ),
