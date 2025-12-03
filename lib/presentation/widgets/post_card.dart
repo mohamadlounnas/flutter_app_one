@@ -39,165 +39,164 @@ class _PostCardState extends State<PostCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedScale(
-        scale: _isHovered ? 1.02 : 1.0,
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeInOut,
-        child: Card(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header with author and time
-                  Row(
-                    children: [
-                      AvatarWidget(
-                        imageUrl: widget.post.author?.imageUrl,
-                        name: widget.post.author?.name ?? 'Anonymous',
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'u/${widget.post.author?.name ?? 'anonymous'}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              DateTimeUtils.timeAgo(widget.post.createdAt),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Title
-                  Text(
-                    widget.post.title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 2), // More compact margins
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Reduced padding
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Compact header with author and time in single line
+                Row(
+                  children: [
+                    AvatarWidget(
+                      imageUrl: widget.post.author?.imageUrl,
+                      name: widget.post.author?.name ?? 'Anonymous',
+                      size: 20, // Smaller avatar
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-
-                  // Description
-                  if (widget.post.description.isNotEmpty)
-                    Text(
-                      widget.post.description,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                  // Image with Hero and AnimatedSwitcher
-                  if (widget.post.imageUrl != null) ...[
-                    const SizedBox(height: 12),
-                    Hero(
-                      tag: 'post-image-${widget.post.id}',
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 250),
-                          switchInCurve: Curves.easeInOut,
-                          child: Image.network(
-                            widget.post.imageUrl!,
-                            key: ValueKey(widget.post.imageUrl),
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: double.infinity,
-                                height: 200,
-                                color:
-                                    theme.colorScheme.surfaceContainerHighest,
-                                child: const Icon(Icons.image_not_supported),
-                              );
-                            },
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Text(
+                            'u/${widget.post.author?.name ?? 'anonymous'}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
+                          Text(
+                            ' · ${DateTimeUtils.timeAgo(widget.post.createdAt)}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 8), // Reduced spacing
 
-                  const SizedBox(height: 12),
+                // Title - more compact
+                Text(
+                  widget.post.title,
+                  style: theme.textTheme.titleSmall?.copyWith( // Changed from titleMedium
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
 
-                  // Action buttons
-                  Row(
-                    children: [
-                      // Upvote/Downvote
-                      Container(
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.arrow_upward, size: 18),
-                              onPressed: widget.onUpvote,
-                              visualDensity: VisualDensity.compact,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            Text(
-                              '${widget.upvotes ?? 0}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.arrow_downward, size: 18),
-                              onPressed: widget.onDownvote,
-                              visualDensity: VisualDensity.compact,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Comments
-                      _ActionButton(
-                        icon: Icons.chat_bubble_outline,
-                        label: '${widget.commentCount ?? 0}',
-                        onTap: widget.onComment,
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Share
-                      _ActionButton(
-                        icon: Icons.share_outlined,
-                        label: 'Share',
-                        onTap: widget.onShare,
-                      ),
-                    ],
+                // Description - more compact
+                if (widget.post.description.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.post.description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 13,
+                    ),
+                    maxLines: 2, // Reduced from 3
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
-              ),
-            ), // Padding
-          ), // InkWell
-        ), // Card
-      ), // AnimatedScale
-    ); // MouseRegion
+
+                // Image - more compact
+                if (widget.post.imageUrl != null) ...[
+                  const SizedBox(height: 8),
+                  Hero(
+                    tag: 'post-image-${widget.post.id}',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        widget.post.imageUrl!,
+                        width: double.infinity,
+                        height: 180, // Reduced from 200
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: double.infinity,
+                            height: 180,
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            child: const Icon(Icons.image_not_supported, size: 32),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 8), // Reduced spacing
+
+                // Compact action buttons
+                Row(
+                  children: [
+                    // Upvote/Downvote - more compact
+                    Container(
+                      height: 28, // Fixed height for consistency
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_upward, size: 16),
+                            onPressed: widget.onUpvote,
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.all(4),
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 28),
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          Text(
+                            '${widget.upvotes ?? 0}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_downward, size: 16),
+                            onPressed: widget.onDownvote,
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.all(4),
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 28),
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+
+                    // Comments - compact
+                    _ActionButton(
+                      icon: Icons.chat_bubble_outline,
+                      label: '${widget.commentCount ?? 0}',
+                      onTap: widget.onComment,
+                    ),
+                    const SizedBox(width: 6),
+
+                    // Share - compact
+                    _ActionButton(
+                      icon: Icons.share_outlined,
+                      label: 'Share',
+                      onTap: widget.onShare,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -214,21 +213,24 @@ class _ActionButton extends StatelessWidget {
 
     return Material(
       color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          height: 28, // Fixed height for consistency
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), // More compact
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+              Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
+                  fontSize: 12,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),

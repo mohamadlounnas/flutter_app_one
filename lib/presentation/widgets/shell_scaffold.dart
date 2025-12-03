@@ -35,13 +35,8 @@ class _RedditBottomNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Determine selected index based on current path
-    int selectedIndex = 0;
-    if (currentPath.startsWith('/posts')) {
-      selectedIndex = 0;
-    } else if (currentPath.startsWith('/profile')) {
-      selectedIndex = 1;
-    }
+    // Determine selected index based on current path using route matching
+    final selectedIndex = _getSelectedIndex(currentPath);
 
     return Container(
       decoration: BoxDecoration(
@@ -55,7 +50,7 @@ class _RedditBottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: SizedBox(
-          height: 56,
+          height: 48, // More compact like Reddit
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -78,6 +73,13 @@ class _RedditBottomNavBar extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Determines the selected tab index based on the current route path
+  int _getSelectedIndex(String path) {
+    if (path.startsWith('/posts')) return 0;
+    if (path.startsWith('/profile')) return 1;
+    return 0; // Default to home
   }
 }
 
@@ -105,18 +107,19 @@ class _NavBarItem extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 4), // More compact
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 isSelected ? activeIcon : icon,
                 color: isSelected
                     ? colorScheme.primary
                     : colorScheme.onSurfaceVariant,
-                size: 24,
+                size: 22, // Slightly smaller for compact design
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2), // Reduced spacing
               Text(
                 label,
                 style: theme.textTheme.labelSmall?.copyWith(
@@ -124,6 +127,7 @@ class _NavBarItem extends StatelessWidget {
                       ? colorScheme.primary
                       : colorScheme.onSurfaceVariant,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontSize: 11, // Smaller text for compact design
                 ),
               ),
             ],

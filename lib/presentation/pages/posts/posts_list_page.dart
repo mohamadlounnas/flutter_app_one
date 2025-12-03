@@ -63,10 +63,15 @@ class _PostsListPageState extends State<PostsListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Feed'),
-        centerTitle: true,
+        centerTitle: false, // Left-aligned like Reddit
+        titleTextStyle: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
+            iconSize: 22, // Slightly smaller
             onPressed: () {
               showSearch(
                 context: context,
@@ -80,6 +85,7 @@ class _PostsListPageState extends State<PostsListPage> {
           if (authController.isAuthenticated)
             IconButton(
               icon: const Icon(Icons.person),
+              iconSize: 22,
               onPressed: () {
                 context.go('/profile');
               },
@@ -89,7 +95,7 @@ class _PostsListPageState extends State<PostsListPage> {
               onPressed: () {
                 context.go('/login');
               },
-              child: const Text('Login'),
+              child: const Text('Login', style: TextStyle(fontSize: 13)),
             ),
         ],
       ),
@@ -196,7 +202,7 @@ class _PostsListPageState extends State<PostsListPage> {
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.zero, // Remove padding for compact Reddit-style layout
       itemCount: postsController.posts.length + (postsController.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= postsController.posts.length) {

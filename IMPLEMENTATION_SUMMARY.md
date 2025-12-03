@@ -8,7 +8,7 @@ This implementation adds declarative routing using `go_router` with a shell rout
 ### Files Changed: 13
 - **Added**: 3 new files
 - **Modified**: 10 existing files
-- **Lines**: +368 / -95
+- **Lines**: +553 / -95
 
 ## Key Features Implemented
 
