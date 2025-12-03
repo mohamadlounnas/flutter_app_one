@@ -40,7 +40,7 @@ class _PostCardState extends State<PostCard> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 2), // More compact margins
+        margin: const EdgeInsets.symmetric(vertical: 2), // More compact margins
         child: InkWell(
           onTap: widget.onTap,
           borderRadius: BorderRadius.circular(12),
@@ -152,7 +152,7 @@ class _PostCardState extends State<PostCard> {
                             onPressed: widget.onUpvote,
                             visualDensity: VisualDensity.compact,
                             padding: const EdgeInsets.all(4),
-                            constraints: const BoxConstraints(minWidth: 32, minHeight: 28),
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 24),
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                           Text(
@@ -167,7 +167,7 @@ class _PostCardState extends State<PostCard> {
                             onPressed: widget.onDownvote,
                             visualDensity: VisualDensity.compact,
                             padding: const EdgeInsets.all(4),
-                            constraints: const BoxConstraints(minWidth: 32, minHeight: 28),
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 24),
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ],
