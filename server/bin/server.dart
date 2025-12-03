@@ -17,53 +17,44 @@ void main(List<String> arguments) async {
 
   // Setup routes
   final router = setupRoutes();
-  
+
   // Setup Flutter web static handler if directory exists
   final flutterWebPath = path.join(Directory.current.path, 'flutter_web');
   print('Checking Flutter web at: $flutterWebPath');
   print('Directory exists: ${Directory(flutterWebPath).existsSync()}');
-  
+
   Handler handler;
   if (Directory(flutterWebPath).existsSync()) {
     print('Flutter web found - setting up static handler');
-    final flutterHandler = createStaticHandler(
-      flutterWebPath,
-      defaultDocument: 'index.html',
-    );
-    
+    final flutterHandler = createStaticHandler(flutterWebPath, defaultDocument: 'index.html');
+
     // Create a handler that checks path and routes accordingly
-    handler = Pipeline()
-        .addMiddleware(corsHeaders())
-        .addMiddleware(logRequests())
-        .addHandler((Request request) {
-          final requestPath = request.url.path;
-          
-          // Handle /flutter paths
-          if (requestPath == '/flutter' || requestPath == '/flutter/') {
-            // Serve index.html for /flutter/
-            final indexRequest = request.change(path: '/');
-            return flutterHandler(indexRequest);
-          } else if (requestPath.startsWith('/flutter/')) {
-            // Serve files under /flutter/
-            final filePath = requestPath.substring('/flutter'.length);
-            final fileRequest = request.change(path: filePath.isEmpty ? '/' : filePath);
-            return flutterHandler(fileRequest);
-          }
-          
-          // All other paths go to router
-          return router(request);
-        });
+    handler = Pipeline().addMiddleware(corsHeaders()).addMiddleware(logRequests()).addHandler((Request request) {
+      final requestPath = request.url.path;
+
+      // Handle /flutter paths
+      if (requestPath == '/flutter' || requestPath == '/flutter/') {
+        // Serve index.html for /flutter/
+        final indexRequest = request.change(path: '/');
+        return flutterHandler(indexRequest);
+      } else if (requestPath.startsWith('/flutter/')) {
+        // Serve files under /flutter/
+        final filePath = requestPath.substring('/flutter'.length);
+        final fileRequest = request.change(path: filePath.isEmpty ? '/' : filePath);
+        return flutterHandler(fileRequest);
+      }
+
+      // All other paths go to router
+      return router(request);
+    });
   } else {
     print('Flutter web not found - serving API only');
-    handler = Pipeline()
-        .addMiddleware(corsHeaders())
-        .addMiddleware(logRequests())
-        .addHandler(router);
+    handler = Pipeline().addMiddleware(corsHeaders()).addMiddleware(logRequests()).addHandler(router);
   }
 
   // Get port from environment or use default
   final port = int.parse(Platform.environment['PORT'] ?? '8080');
-  
+
   // Get host - use 0.0.0.0 to allow access from local network
   final host = InternetAddress.anyIPv4;
 
@@ -83,20 +74,22 @@ void main(List<String> arguments) async {
   print('  GET    /api/auth/me           - Get current user info');
   print('  POST   /api/auth/refresh      - Refresh JWT token');
   print('  PUT    /api/auth/change-password - Change password');
+  print('  PUT    /api/auth/me          - Update current user profile');
   print('');
-  print('  Dishes (public read, admin write):');
-  print('  GET    /api/dishes');
-  print('  GET    /api/dishes/<id>');
-  print('  POST   /api/dishes            - Admin only');
-  print('  PUT    /api/dishes/<id>       - Admin only');
-  print('  DELETE /api/dishes/<id>       - Admin only');
+  print('  Posts (public read, protected write):');
+  print('  GET    /api/posts');
+  print('  GET    /api/posts/<id>');
+  print('  GET    /api/posts/user/<userId>');
+  print('  POST   /api/posts            - Authenticated');
+  print('  PUT    /api/posts/<id>       - Authenticated (Owner/Admin)');
+  print('  DELETE /api/posts/<id>       - Authenticated (Owner/Admin)');
   print('');
-  print('  Orders (protected):');
-  print('  GET    /api/orders');
-  print('  GET    /api/orders/<id>');
-  print('  POST   /api/orders');
-  print('  PUT    /api/orders/<id>');
-  print('  DELETE /api/orders/<id>');
+  print('  Comments (public read, protected write):');
+  print('  GET    /api/posts/<postId>/comments');
+  print('  GET    /api/comments/<id>');
+  print('  POST   /api/posts/<postId>/comments');
+  print('  PUT    /api/comments/<id>    - Authenticated (Owner/Admin)');
+  print('  DELETE /api/comments/<id>    - Authenticated (Owner/Admin)');
   print('');
   print('  Users (admin only):');
   print('  GET    /api/users');
@@ -123,4 +116,3 @@ Future<String> _getLocalIP() async {
   }
   return 'localhost';
 }
-

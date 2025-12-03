@@ -31,39 +31,66 @@ class AppDatabase {
   }
 
   void _createTables() {
-    // Create users table
+    // Create users table with imageUrl, createdAt, updatedAt
     _db.execute('''
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         phone TEXT NOT NULL UNIQUE,
         password TEXT,
-        role TEXT NOT NULL
+        image_url TEXT,
+        role TEXT NOT NULL DEFAULT 'user',
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT
       )
     ''');
 
-    // Create dishes table
+    // Create posts table
     _db.execute('''
-      CREATE TABLE IF NOT EXISTS dishes (
+      CREATE TABLE IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        photoUrl TEXT NOT NULL,
-        price REAL NOT NULL
+        user_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT,
+        body TEXT NOT NULL,
+        image_url TEXT,
+        upvotes INTEGER DEFAULT 0,
+        downvotes INTEGER DEFAULT 0,
+        is_deleted INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT,
+        deleted_at TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(id)
       )
     ''');
 
-    // Create orders table
+    // Create comments table
     _db.execute('''
-      CREATE TABLE IF NOT EXISTS orders (
+      CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        userId INTEGER,
-        phone TEXT NOT NULL,
-        dishId TEXT NOT NULL,
-        latitude REAL NOT NULL,
-        longitude REAL NOT NULL,
-        address TEXT NOT NULL,
-        completed INTEGER NOT NULL DEFAULT 0,
-        FOREIGN KEY (userId) REFERENCES users(id)
+        post_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        comment TEXT NOT NULL,
+        mentions TEXT,
+        upvotes INTEGER DEFAULT 0,
+        downvotes INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY(post_id) REFERENCES posts(id),
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )
+    ''');
+
+    // Create storage table for file uploads
+    _db.execute('''
+      CREATE TABLE IF NOT EXISTS storage (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        owner_id INTEGER,
+        file_name TEXT NOT NULL,
+        content_type TEXT,
+        size INTEGER,
+        url TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY(owner_id) REFERENCES users(id)
       )
     ''');
 
@@ -72,6 +99,15 @@ class AppDatabase {
 
   void close() {
     _db.dispose();
+  }
+
+  /// Reset database for testing (drops all data)
+  void reset() {
+    _db.execute('DELETE FROM comments');
+    _db.execute('DELETE FROM posts');
+    _db.execute('DELETE FROM storage');
+    _db.execute('DELETE FROM users');
+    print('Database reset successfully');
   }
 }
 

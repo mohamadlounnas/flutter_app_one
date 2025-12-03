@@ -10,8 +10,8 @@ services:
     environment:
       - PORT=8080
     volumes:
-      # Optional: mount data directory to persist database
-      - ./server/data:/app/data
+      # Persist SQLite database
+      - ./data:/app/data
     restart: unless-stopped
 
 

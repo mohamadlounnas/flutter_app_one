@@ -6,6 +6,7 @@ A simple SQLite-based REST API server for the Flutter One app, built with Shelf.
 
 - ✅ SQLite database
 - ✅ CRUD operations for Dishes, Orders, and Users
+ - ✅ CRUD operations for Posts, Comments, Storage, and Users
 - ✅ CORS enabled for local network access
 - ✅ Test data injection
 - ✅ Reuses existing Flutter models
@@ -27,19 +28,26 @@ The server will start on `http://0.0.0.0:8080` (accessible from your local netwo
 
 ## API Endpoints
 
-### Dishes
-- `GET /api/dishes` - Get all dishes
-- `GET /api/dishes/<id>` - Get dish by ID
-- `POST /api/dishes` - Create a new dish
-- `PUT /api/dishes/<id>` - Update a dish
-- `DELETE /api/dishes/<id>` - Delete a dish
+### Posts
+- `GET /api/posts` - Get all posts
+- `GET /api/posts/<id>` - Get post by ID
+- `GET /api/posts/user/<userId>` - Get posts by a user
+- `POST /api/posts` - Create a new post (authenticated)
+- `PUT /api/posts/<id>` - Update a post (owner/admin)
+- `DELETE /api/posts/<id>` - Delete a post (owner/admin, soft delete)
 
-### Orders
-- `GET /api/orders` - Get all orders
-- `GET /api/orders/<id>` - Get order by ID
-- `POST /api/orders` - Create a new order
-- `PUT /api/orders/<id>` - Update an order
-- `DELETE /api/orders/<id>` - Delete an order
+### Comments
+- `GET /api/posts/<postId>/comments` - Get all comments for a post
+- `GET /api/comments/<id>` - Get a comment by ID
+- `POST /api/posts/<postId>/comments` - Create a new comment (authenticated)
+- `PUT /api/comments/<id>` - Update a comment (owner/admin)
+- `DELETE /api/comments/<id>` - Delete a comment (owner/admin)
+
+### Storage
+- `POST /api/storage/upload` - Upload a file (authenticated)
+- `GET /api/storage/my` - List files for current user (authenticated)
+- `GET /api/storage/<filename>` - Download a file by filename
+- `DELETE /api/storage/<id>` - Delete a file (owner/admin)
 
 ### Users
 - `GET /api/users` - Get all users
@@ -54,9 +62,9 @@ The server will start on `http://0.0.0.0:8080` (accessible from your local netwo
 ## Test Data
 
 Test data is automatically injected on first run:
-- 3 users (1 admin, 2 regular users)
-- 5 dishes
-- 3 orders
+- 4 users (1 admin, 3 regular users)
+- 5 posts
+- 15 comments
 
 ## Database
 
@@ -67,6 +75,13 @@ The SQLite database is stored in `server/data/app.db`. The database is automatic
 Set the `PORT` environment variable to change the server port:
 ```bash
 PORT=3000 dart run bin/server.dart
+```
+
+## Testing
+
+Run integration tests (these will start the server if not already running):
+```bash
+dart test server/test/server_test.dart
 ```
 
 
