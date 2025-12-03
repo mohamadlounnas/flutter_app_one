@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_one/presentation/providers/app_providers.dart';
 import 'package:flutter_one/presentation/widgets/post_card.dart';
 import 'package:flutter_one/presentation/widgets/responsive_layout.dart';
@@ -80,13 +81,13 @@ class _PostsListPageState extends State<PostsListPage> {
             IconButton(
               icon: const Icon(Icons.person),
               onPressed: () {
-                Navigator.of(context).pushNamed('/profile');
+                context.go('/profile');
               },
             )
           else
             TextButton(
               onPressed: () {
-                Navigator.of(context).pushNamed('/login');
+                context.go('/login');
               },
               child: const Text('Login'),
             ),
@@ -122,7 +123,7 @@ class _PostsListPageState extends State<PostsListPage> {
       floatingActionButton: authController.isAuthenticated
           ? FloatingActionButton(
               onPressed: () {
-                Navigator.of(context).pushNamed('/posts/create');
+                context.push('/posts/create');
               },
               child: const Icon(Icons.add),
             )
@@ -211,10 +212,10 @@ class _PostsListPageState extends State<PostsListPage> {
         return PostCard(
           post: post,
           onTap: () {
-            Navigator.of(context).pushNamed('/posts/${post.id}');
+            context.push('/posts/${post.id}');
           },
           onComment: () {
-            Navigator.of(context).pushNamed('/posts/${post.id}');
+            context.push('/posts/${post.id}');
           },
         );
       },

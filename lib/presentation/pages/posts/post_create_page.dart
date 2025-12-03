@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_one/core/utils/validators.dart';
 import 'package:flutter_one/presentation/providers/app_providers.dart';
 import 'package:flutter_one/presentation/widgets/responsive_layout.dart';
@@ -121,7 +122,7 @@ class _PostCreatePageState extends State<PostCreatePage> {
         );
 
         if (result != null && mounted) {
-          Navigator.of(context).pop(result);
+          context.pop(result);
         }
       } else {
         final result = await postsController.createPost(
@@ -132,7 +133,7 @@ class _PostCreatePageState extends State<PostCreatePage> {
         );
 
         if (result != null && mounted) {
-          Navigator.of(context).pop(result);
+          context.pop(result);
         }
       }
     } finally {
@@ -219,7 +220,7 @@ class _PostCreatePageState extends State<PostCreatePage> {
                                 const SizedBox(height: 8),
                                 Text(_descriptionController.text.isNotEmpty ? _descriptionController.text : 'Brief description...', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                                 const SizedBox(height: 12),
-                                FilledButton(onPressed: () => Navigator.of(context).pushNamed('/posts/create'), child: const Text('Save Preview')), // just a CTA
+                                FilledButton(onPressed: () => context.push('/posts/create'), child: const Text('Save Preview')), // just a CTA
                               ],
                             ),
                           ),
