@@ -386,6 +386,40 @@ const _apiDocsHtml = '''
       </div>
     </div>
 
+    <div class="endpoint" data-method="PUT" data-path="/api/auth/me">
+      <div class="endpoint-header" onclick="toggleEndpoint(this.parentElement)">
+        <span class="method put">PUT</span>
+        <span class="path">/api/auth/me</span>
+        <span class="auth-badge">🔒 Auth</span>
+        <span class="expand-icon">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-desc">Update current user profile. Provide <code>name</code> and/or <code>image_url</code>. Phone change will generate new token.</p>
+        <div class="try-it">
+          <h4>▶ Try It</h4>
+          <div class="try-it-form">
+            <div class="try-it-row">
+              <label>Name</label>
+              <input type="text" id="updateName" placeholder="John Doe">
+            </div>
+            <div class="try-it-row">
+              <label>Image URL</label>
+              <input type="text" id="updateImageUrl" placeholder="https://example.com/avatar.jpg">
+            </div>
+            <div class="try-it-row">
+              <label>Phone (optional)</label>
+              <input type="text" id="updatePhone" placeholder="0987654321">
+            </div>
+            <button class="btn btn-primary" onclick="tryUpdateMe()">Update Profile</button>
+          </div>
+          <div class="response-panel">
+            <h5>Response</h5>
+            <div id="response-update-me" class="response-output">Fill the fields and click Update Profile</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <h2>📝 Posts</h2>
     
     <div class="endpoint">
@@ -685,6 +719,13 @@ const _apiDocsHtml = '''
         userInfo.textContent = currentUser.name + ' (' + currentUser.role + ')';
         tokenDisplay.textContent = authToken;
         logoutBtn.style.display = 'inline-block';
+        // Pre-fill update profile form if present
+        const updateNameEl = document.getElementById('updateName');
+        if (updateNameEl) updateNameEl.value = currentUser.name || '';
+        const updateImageUrlEl = document.getElementById('updateImageUrl');
+        if (updateImageUrlEl) updateImageUrlEl.value = currentUser.image_url || (currentUser.imageUrl || '');
+        const updatePhoneEl = document.getElementById('updatePhone');
+        if (updatePhoneEl) updatePhoneEl.value = currentUser.phone || '';
       } else {
         badge.className = 'status-badge status-logged-out';
         badge.textContent = 'Not Logged In';
@@ -878,6 +919,64 @@ const _apiDocsHtml = '''
           }
         } catch {}
         
+        responseEl.innerHTML = '<div class="response-status ' + (res.ok ? 'success' : 'error') + '">' + res.status + ' ' + res.statusText + '</div>' + formatted;
+        responseEl.className = 'response-output ' + (res.ok ? 'success' : 'error');
+      } catch (e) {
+        responseEl.innerHTML = 'Error: ' + e.message;
+        responseEl.className = 'response-output error';
+      }
+    }
+
+    async function tryUpdateMe() {
+      const responseEl = document.getElementById('response-update-me');
+      responseEl.innerHTML = '<span class="loading"></span> Updating...';
+      responseEl.className = 'response-output';
+
+      if (!authToken) {
+        alert('Please login first to update your profile');
+        responseEl.innerHTML = 'Not logged in';
+        responseEl.className = 'response-output error';
+        return;
+      }
+
+      const name = document.getElementById('updateName').value.trim();
+      const imageUrl = document.getElementById('updateImageUrl').value.trim();
+      const phone = document.getElementById('updatePhone').value.trim();
+      const body = {};
+      if (name) body.name = name;
+      if (imageUrl) body.image_url = imageUrl;
+      if (phone) body.phone = phone;
+      if (Object.keys(body).length === 0) {
+        alert('Please provide at least one field to update.');
+        responseEl.innerHTML = 'No fields to update.';
+        responseEl.className = 'response-output error';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/me', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+          body: JSON.stringify(body),
+        });
+        const text = await res.text();
+        let formatted = text;
+        try { formatted = JSON.stringify(JSON.parse(text), null, 2); } catch (e) {}
+        
+        if (res.ok) {
+          const json = JSON.parse(text);
+          // Update token and user if returned
+          if (json.token) {
+            authToken = json.token;
+            localStorage.setItem('apiToken', authToken);
+          }
+          if (json.user) {
+            currentUser = json.user;
+            localStorage.setItem('apiUser', JSON.stringify(currentUser));
+            updateAuthUI();
+          }
+        }
+
         responseEl.innerHTML = '<div class="response-status ' + (res.ok ? 'success' : 'error') + '">' + res.status + ' ' + res.statusText + '</div>' + formatted;
         responseEl.className = 'response-output ' + (res.ok ? 'success' : 'error');
       } catch (e) {
