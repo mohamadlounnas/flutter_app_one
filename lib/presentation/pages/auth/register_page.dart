@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_one/core/utils/validators.dart';
 import 'package:flutter_one/presentation/providers/app_providers.dart';
 import 'package:flutter_one/presentation/widgets/responsive_layout.dart';
@@ -44,7 +45,7 @@ class _RegisterPageState extends State<RegisterPage> {
         password: _passwordController.text,
       );
       if (success && mounted) {
-        Navigator.of(context).pushReplacementNamed('/posts');
+        context.go('/posts');
       }
     }
   }
@@ -108,7 +109,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                       const SizedBox(height: 24),
                                       FilledButton(onPressed: authController.isLoading ? null : () => _handleRegister(context), child: Padding(padding: const EdgeInsets.all(12), child: authController.isLoading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Create Account'))),
                                       const SizedBox(height: 16),
-                                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Text('Already have an account?'), TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Login'))]),
+                                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Text('Already have an account?'), TextButton(onPressed: () => context.pop(), child: const Text('Login'))]),
                                     ],
                                   ),
                                 ),
@@ -138,7 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 const SizedBox(height: 24),
                                 FilledButton(onPressed: authController.isLoading ? null : () => _handleRegister(context), child: Padding(padding: const EdgeInsets.all(12), child: authController.isLoading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Create Account'))),
                                 const SizedBox(height: 16),
-                                Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Text('Already have an account?'), TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Login'))]),
+                                Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Text('Already have an account?'), TextButton(onPressed: () => context.pop(), child: const Text('Login'))]),
                                 const SizedBox(height: 16),
                               ],
                             ),

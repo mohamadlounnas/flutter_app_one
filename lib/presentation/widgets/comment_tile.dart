@@ -171,7 +171,7 @@ class CommentTile extends StatelessWidget {
       Colors.teal,
       Colors.pink,
     ];
-    return colors[depth % colors.length].withOpacity(0.5);
+    return colors[depth % colors.length].withValues(alpha: 0.5);
   }
 }
 

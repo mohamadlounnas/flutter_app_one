@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_one/core/utils/validators.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:mime/mime.dart';
@@ -136,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
       final authController = AuthProvider.of(context);
       await authController.logout();
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+        context.go('/login');
       }
     }
   }

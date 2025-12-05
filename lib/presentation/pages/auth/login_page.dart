@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_one/core/utils/validators.dart';
 import 'package:flutter_one/presentation/providers/app_providers.dart';
 import 'package:flutter_one/presentation/widgets/responsive_layout.dart';
@@ -33,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (success && mounted) {
-        Navigator.of(context).pushReplacementNamed('/posts');
+        context.go('/posts');
       }
     }
   }
@@ -116,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
                                       const SizedBox(height: 16),
 
                                       // Register link
-                                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Text("Don't have an account?"), TextButton(onPressed: () => Navigator.of(context).pushNamed('/register'), child: const Text('Sign Up'))]),
+                                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Text("Don't have an account?"), TextButton(onPressed: () => context.push('/register'), child: const Text('Sign Up'))]),
                                     ],
                                   ),
                                 ),
@@ -153,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                                 const SizedBox(height: 16),
 
                                 // Register link
-                                Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Text("Don't have an account?"), TextButton(onPressed: () => Navigator.of(context).pushNamed('/register'), child: const Text('Sign Up'))]),
+                                Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Text("Don't have an account?"), TextButton(onPressed: () => context.push('/register'), child: const Text('Sign Up'))]),
                                 const SizedBox(height: 16),
                               ],
                             ),

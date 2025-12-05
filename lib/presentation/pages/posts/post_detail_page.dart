@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_one/core/utils/date_time_utils.dart';
 import 'package:flutter_one/presentation/providers/app_providers.dart';
 import 'package:flutter_one/presentation/widgets/post_card.dart';
@@ -103,7 +104,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
       final postsController = PostsProvider.of(context);
       final success = await postsController.deletePost(widget.postId);
       if (success && mounted) {
-        Navigator.of(context).pop();
+        context.pop();
       }
     }
   }
@@ -150,7 +151,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               ],
               onSelected: (value) {
                 if (value == 'edit') {
-                  Navigator.of(context).pushNamed('/posts/${widget.postId}/edit');
+                  context.push('/posts/${widget.postId}/edit');
                 } else if (value == 'delete') {
                   _handleDeletePost();
                 }

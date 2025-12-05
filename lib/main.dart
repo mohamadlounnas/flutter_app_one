@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'core/router/app_router.dart';
 import 'presentation/presentation.dart';
 
 void main() {
@@ -10,16 +11,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final router = AppRouter.createRouter();
+
     return AppProviders(
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'Blog Platform',
         debugShowCheckedModeBanner: false,
+        routerConfig: router,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepOrange,
+            seedColor: const Color(0xFFFF4500), // Reddit's iconic orange
             brightness: Brightness.light,
           ),
           useMaterial3: true,
+          scaffoldBackgroundColor: const Color(0xFFDAE0E6), // Reddit's light grey background
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: Colors.grey.shade100,
@@ -58,10 +63,11 @@ class MyApp extends StatelessWidget {
         ),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepOrange,
+            seedColor: const Color(0xFFFF4500), // Reddit's iconic orange
             brightness: Brightness.dark,
           ),
           useMaterial3: true,
+          scaffoldBackgroundColor: const Color(0xFF1A1A1B), // Reddit's dark background
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: Colors.grey.shade900,
@@ -95,82 +101,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         themeMode: ThemeMode.system,
-        initialRoute: '/posts',
-        onGenerateRoute: _onGenerateRoute,
       ),
-    );
-  }
-
-  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
-    // Parse route name
-    final uri = Uri.parse(settings.name ?? '/');
-    final pathSegments = uri.pathSegments;
-
-    // Auth routes
-    if (settings.name == '/login') {
-      return MaterialPageRoute(
-        builder: (_) => const LoginPage(),
-        settings: settings,
-      );
-    }
-
-    if (settings.name == '/register') {
-      return MaterialPageRoute(
-        builder: (_) => const RegisterPage(),
-        settings: settings,
-      );
-    }
-
-    if (settings.name == '/profile') {
-      return MaterialPageRoute(
-        builder: (_) => const ProfilePage(),
-        settings: settings,
-      );
-    }
-
-    // Posts routes
-    if (settings.name == '/posts') {
-      return MaterialPageRoute(
-        builder: (_) => const PostsListPage(),
-        settings: settings,
-      );
-    }
-
-    if (settings.name == '/posts/create') {
-      return MaterialPageRoute(
-        builder: (_) => const PostCreatePage(),
-        settings: settings,
-      );
-    }
-
-    // /posts/:id
-    if (pathSegments.length == 2 && pathSegments[0] == 'posts') {
-      final postId = int.tryParse(pathSegments[1]);
-      if (postId != null) {
-        return MaterialPageRoute(
-          builder: (_) => PostDetailPage(postId: postId),
-          settings: settings,
-        );
-      }
-    }
-
-    // /posts/:id/edit
-    if (pathSegments.length == 3 &&
-        pathSegments[0] == 'posts' &&
-        pathSegments[2] == 'edit') {
-      final postId = int.tryParse(pathSegments[1]);
-      if (postId != null) {
-        return MaterialPageRoute(
-          builder: (_) => PostCreatePage(postId: postId),
-          settings: settings,
-        );
-      }
-    }
-
-    // Default: posts list
-    return MaterialPageRoute(
-      builder: (_) => const PostsListPage(),
-      settings: settings,
     );
   }
 }

@@ -58,6 +58,8 @@ class PostHandler {
           'created_at': row['created_at'],
           'updated_at': row['updated_at'],
           'deleted_at': row['deleted_at'],
+          'upvotes': row['upvotes'] ?? 0,
+          'downvotes': row['downvotes'] ?? 0,
         };
 
         if (row['author_id'] != null) {
@@ -124,6 +126,8 @@ class PostHandler {
         'created_at': row['created_at'],
         'updated_at': row['updated_at'],
         'deleted_at': row['deleted_at'],
+        'upvotes': row['upvotes'] ?? 0,
+        'downvotes': row['downvotes'] ?? 0,
       };
 
       if (row['author_id'] != null) {
