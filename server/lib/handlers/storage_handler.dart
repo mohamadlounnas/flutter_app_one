@@ -23,6 +23,10 @@ class StorageHandler {
   /// Upload a file (requires authentication)
   Future<Response> upload(Request request) async {
     try {
+      // Add a top-level try/catch so we can log errors (prints will show in
+      // cloud providers' logs) for debugging and to return a proper error
+      // response instead of letting the process crash.
+      
       final userId = request.context['userId'] as int?;
       if (userId == null) {
         return Response.forbidden(
@@ -46,17 +50,30 @@ class StorageHandler {
 
       // Try multipart/form-data first using shelf_multipart
       if (request.multipart() case var multipart?) {
+        // Read all parts — we capture the first file part, and drain the
+        // rest to ensure the multipart stream is fully consumed. Not
+        // consuming all parts can cause client/proxy timeouts or errors.
+        bool foundFile = false;
         await for (final part in multipart.parts) {
           final contentDisposition = part.headers['content-disposition'] ?? '';
           final partContentType = part.headers['content-type'];
-          
           // Extract filename from content-disposition header
           final fileNameMatch = RegExp(r'filename="?([^";\n]+)"?').firstMatch(contentDisposition);
-          if (fileNameMatch != null) {
+          if (fileNameMatch != null && !foundFile) {
+            foundFile = true;
             fileName = fileNameMatch.group(1);
             fileContentType = partContentType;
             fileBytes = await part.readBytes();
-            break; // Take the first file part
+            // continue iterating to drain remaining parts rather than break
+            continue;
+          }
+
+          // For non-file parts or additional file parts, ensure we read them
+          // to free the underlying request stream resources.
+          try {
+            await part.readBytes();
+          } catch (_) {
+            // ignore errors while draining non-essential parts
           }
         }
         
@@ -105,6 +122,20 @@ class StorageHandler {
         // Detect actual content type from magic bytes
         final detectedType = _detectContentTypeFromBytes(fileBytes);
         fileContentType = detectedType ?? fileContentType;
+        
+        // If we're dealing with a base64 encoded small JSON payload that is
+        // actually a placeholder string (e.g., "file=[$file.xyz]"), reject it
+        // to avoid saving invalid text as files. This matches the behavior of
+        // the clients that send the real file bytes.
+        if (fileBytes.isNotEmpty && fileContentType == 'text/plain') {
+          final contentStr = utf8.decode(fileBytes, allowMalformed: true);
+          if (contentStr.startsWith('file=[') || contentStr.startsWith('file=')) {
+            return Response.badRequest(
+              body: jsonEncode({'error': 'Invalid file payload; upload raw file or send base64 data'}),
+              headers: {'Content-Type': 'application/json'},
+            );
+          }
+        }
         
       } else {
         return Response.badRequest(
@@ -161,7 +192,10 @@ class StorageHandler {
         }),
         headers: {'Content-Type': 'application/json'},
       );
-    } catch (e) {
+    } catch (e, st) {
+      // Log the full stack trace for easier debugging in production
+      print('storage_handler.upload - error: $e');
+      print(st.toString());
       return Response.internalServerError(
         body: jsonEncode({'error': e.toString()}),
         headers: {'Content-Type': 'application/json'},
