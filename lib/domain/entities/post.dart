@@ -12,6 +12,8 @@ class PostEntity {
   final DateTime? updatedAt;
   final DateTime? deletedAt;
   final UserEntity? author;
+  final int upvotes;
+  final int downvotes;
 
   const PostEntity({
     this.id,
@@ -24,6 +26,8 @@ class PostEntity {
     this.updatedAt,
     this.deletedAt,
     this.author,
+    this.upvotes = 0,
+    this.downvotes = 0,
   });
 
   bool get isDeleted => deletedAt != null;
@@ -39,6 +43,8 @@ class PostEntity {
     DateTime? updatedAt,
     DateTime? deletedAt,
     UserEntity? author,
+    int? upvotes,
+    int? downvotes,
   }) {
     return PostEntity(
       id: id ?? this.id,
@@ -51,6 +57,8 @@ class PostEntity {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       author: author ?? this.author,
+      upvotes: upvotes ?? this.upvotes,
+      downvotes: downvotes ?? this.downvotes,
     );
   }
 

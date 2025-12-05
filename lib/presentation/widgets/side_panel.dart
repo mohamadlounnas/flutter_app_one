@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_one/domain/entities/post.dart';
 import 'package:flutter_one/presentation/providers/app_providers.dart';
-// removed unused import
 
 /// A simple side panel to show trending posts, brief stats and a CTA for creating posts.
 class SidePanel extends StatelessWidget {
@@ -12,9 +13,9 @@ class SidePanel extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Pick top 5 posts (best effort). If no posts show placeholder.
-    final top = postsController.posts.isNotEmpty
-        ? postsController.posts.take(5).toList()
-        : <dynamic>[];
+    final List<PostEntity> top = postsController.posts.isNotEmpty
+      ? postsController.posts.take(5).toList()
+      : <PostEntity>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -40,10 +41,12 @@ class SidePanel extends StatelessWidget {
                     ],
                   )
                 else
-                  ...top.map((p) => _TrendingItem(post: p as dynamic)).toList(),
+                  ...top.map((post) => _TrendingItem(post: post)),
                 const SizedBox(height: 12),
                 FilledButton.icon(
-                  onPressed: () { Navigator.of(context).pushNamed('/posts/create'); },
+                  onPressed: () {
+                    context.push('/posts/create');
+                  },
                   icon: const Icon(Icons.add),
                   label: const Text('Create Post'),
                 ),
@@ -81,7 +84,7 @@ class SidePanel extends StatelessWidget {
 }
 
 class _TrendingItem extends StatelessWidget {
-  final dynamic post;
+  final PostEntity post;
 
   const _TrendingItem({required this.post});
 
@@ -90,7 +93,7 @@ class _TrendingItem extends StatelessWidget {
     final theme = Theme.of(context);
 
     return InkWell(
-      onTap: () => Navigator.of(context).pushNamed('/posts/${post.id}'),
+      onTap: () => context.push('/posts/${post.id}'),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
@@ -99,9 +102,9 @@ class _TrendingItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(post.title ?? '', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(post.title, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 4),
-                  Text('u/${post.author?.name ?? 'anonymous'} · ${post.upvotes ?? 0} upvotes', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text('u/${post.author?.name ?? 'anonymous'} · ${post.upvotes} upvotes', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),

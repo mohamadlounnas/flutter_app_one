@@ -41,6 +41,10 @@ class _PostCardState extends State<PostCard> {
       onExit: (_) => setState(() => _isHovered = false),
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 2), // More compact margins
+        elevation: _isHovered ? 3 : 0,
+        shadowColor: _isHovered
+          ? theme.colorScheme.primary.withValues(alpha: 0.2)
+          : theme.shadowColor,
         child: InkWell(
           onTap: widget.onTap,
           borderRadius: BorderRadius.circular(12),
@@ -263,7 +267,7 @@ class AvatarWidget extends StatelessWidget {
       return CircleAvatar(
         radius: size / 2,
         backgroundImage: NetworkImage(imageUrl!),
-        onBackgroundImageError: (_, __) {},
+        onBackgroundImageError: (error, stackTrace) {},
         child: null,
       );
     }

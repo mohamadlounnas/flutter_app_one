@@ -13,6 +13,8 @@ class PostModel {
   final DateTime? updatedAt;
   final DateTime? deletedAt;
   final UserModel? author;
+  final int upvotes;
+  final int downvotes;
 
   const PostModel({
     this.id,
@@ -25,6 +27,8 @@ class PostModel {
     this.updatedAt,
     this.deletedAt,
     this.author,
+    this.upvotes = 0,
+    this.downvotes = 0,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +51,12 @@ class PostModel {
       author: json['author'] != null
           ? UserModel.fromJson(json['author'] as Map<String, dynamic>)
           : null,
+        upvotes: json['upvotes'] is int
+          ? json['upvotes'] as int
+          : int.tryParse('${json['upvotes']}') ?? 0,
+        downvotes: json['downvotes'] is int
+          ? json['downvotes'] as int
+          : int.tryParse('${json['downvotes']}') ?? 0,
     );
   }
 
@@ -61,6 +71,8 @@ class PostModel {
       if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
       if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
       if (deletedAt != null) 'deleted_at': deletedAt!.toIso8601String(),
+      'upvotes': upvotes,
+      'downvotes': downvotes,
     };
   }
 
@@ -77,6 +89,8 @@ class PostModel {
       updatedAt: updatedAt,
       deletedAt: deletedAt,
       author: author?.toEntity(),
+      upvotes: upvotes,
+      downvotes: downvotes,
     );
   }
 
@@ -92,6 +106,8 @@ class PostModel {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       deletedAt: entity.deletedAt,
+      upvotes: entity.upvotes,
+      downvotes: entity.downvotes,
     );
   }
 
@@ -108,6 +124,8 @@ class PostModel {
     DateTime? updatedAt,
     DateTime? deletedAt,
     UserModel? author,
+    int? upvotes,
+    int? downvotes,
   }) {
     return PostModel(
       id: id ?? this.id,
@@ -120,6 +138,8 @@ class PostModel {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       author: author ?? this.author,
+      upvotes: upvotes ?? this.upvotes,
+      downvotes: downvotes ?? this.downvotes,
     );
   }
 

@@ -67,9 +67,6 @@ class Validators {
     if (value == null || value.isEmpty) {
       return 'Comment is required';
     }
-    if (value.length < 1) {
-      return 'Comment cannot be empty';
-    }
     if (value.length > 1000) {
       return 'Comment must be less than 1000 characters';
     }
