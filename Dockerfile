@@ -12,13 +12,7 @@ COPY lib ./lib/
 
 # Create a minimal pubspec.yaml for the parent project (without Flutter dependencies)
 # This allows the server's path dependency to resolve correctly
-RUN cat > pubspec.yaml << 'EOF'
-name: flutter_one
-version: 0.1.0+1
-publish_to: none
-environment:
-  sdk: ^3.10.0
-EOF
+RUN printf 'name: flutter_one\nversion: 0.1.0+1\npublish_to: none\nenvironment:\n  sdk: ^3.10.0\n' > pubspec.yaml
 
 # Copy server source files
 COPY server/lib ./server/lib/
